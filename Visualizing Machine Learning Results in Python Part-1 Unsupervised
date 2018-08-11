@@ -1,0 +1,77 @@
+Visualizing Machine Learning Results in Python Part-1 Unsupervised
+中文：最近看了一篇文章叫做 《Machine Learning Results in R : one plots to rule them all!!》，文章中作者很好的整合了DALEX , lares ，ggplots 包的功能，非常好的展示了机器学习模型拟合的情况和结果，R 与 Python 在数据可视化领域都有其各自的优势，相比于SAS，两者更加灵活一些，本文中文中作者主要用描述性的语句来叙述常见的K-mean 聚类和PCA主成分分析结果可视化。
+English: recently read an article called "Machine Learning Results in R: one plots to rule them all!!!!" , in the article the author very good integration DALEX, lares, ggplots package function, shows very good machine learning model fitting and as a result, the condition of the R and Python has its own advantages in the field of data visualization, compared with SAS, the more flexible, in this paper, the author mainly use descriptive statements in Chinese narrative account of a common K - mean clustering and PCA principal component analysis results visualization
+K-mean聚类分析 K-mean clustering analysis
+In [6]:
+#load function API 
+import numpy as np
+import matplotlib.pyplot as plt
+import scikitplot as skplt
+from sklearn.cluster import KMeans
+from sklearn.decomposition import PCA
+from sklearn import datasets
+In [62]:
+np.random.seed(42)
+iris = datasets.load_iris()
+X = iris.data
+y = iris.target
+target_names = iris.target_names
+ 实际工作中做K-mean 聚类的主要的一个问题就是K的取值，作者采用了两种方式来判断聚类最佳类别数，一种是inertia簇内误差平方和，另外一种Elbow plot 图形可视化分析。两种方式得出了相同的结果。
+K - mean clustering in practical work the main problem is the K value, the author adopted two ways to determine the optimal class number of clustering, is a kind of inertia cluster-heads error sum of squares, another here plot graph visualization analysis. We get the same result in both ways.
+In [ ]:
+# Create scaler: scaler
+ks = range(1, 20)
+inertias = []
+for k in ks:
+    # Create a KMeans instance with k clusters: model
+    kmeans=KMeans(n_clusters=k)
+    # Fit model to samples
+    kmeans.fit(X)
+    # Append the inertia to the list of inertias
+    inertias.append(kmeans.inertia_)
+# Plot ks vs inertias
+plt.plot(ks, inertias, '-o')
+plt.xlabel('number of clusters, k')
+plt.ylabel('inertia')
+plt.xticks(ks)
+plt.show()
+In [65]:
+kmeans=KMeans(random_state=1)
+skplt.cluster.plot_elbow_curve(clf=kmeans,X=X, cluster_ranges=range(1,20),figsize=(6,6),title="Elbow Plot",show_cluster_time=True)
+plt.show()
+
+silhouette-analysis-on-kmeans-clustering
+我们通过轮廓系数分析评估聚类结果，聚类评估算法-轮廓系数（Silhouette Coefficient ），轮廓系数（Silhouette Coefficient），是聚类效果好坏的一种评价方式。最早由 Peter J. Rousseeuw 在 1986 提出。它结合内聚度和分离度两种因素。可以用来在相同原始数据的基础上用来评价不同算法、或者算法不同运行方式对聚类结果所产生的影响。
+We evaluated the clustering results through contour Coefficient analysis, and the clustering evaluation algorithm -- Silhouette Coefficient and Silhouette Coefficient -- was an evaluation method for the clustering effect. First proposed by Peter j. Rousseeuw in 1986. It combines two factors, cohesion and separation. It can be used on the basis of the same original data to evaluate the impact of different algorithms or different operation modes on the clustering results.
+In [68]:
+kmeans = KMeans(n_clusters=3, random_state=1)
+cluster_labels = kmeans.fit_predict(X)
+skplt.metrics.plot_silhouette(X, cluster_labels)
+plt.show()
+
+由上图可知，当K=3时聚类结果sihouette分析评分均高于0.553，聚类结果整体来说是比较不错的。 It can be seen from the above figure that when K=3, the sihouette analysis scores of the clustering results were all higher than 0.553, and the clustering results were relatively good on the whole.
+主成分分析 PCA Analysis results visualizing
+  主成分分析在高维变量向低维变量选择中能够有效降低回归模型的方差，同时能够帮我们了解主要解释方差的变量。这里我们采用传统主成分分析的方法确认主成分的个数，另外通过数据可视化展示主要变量维度方向与类型。
+  Principal component analysis can effectively reduce the variance of regression model in the selection of high-dimensional variables to low-dimensional variables and help us understand the variables that mainly explain variance. Here, the number of principal components is confirmed by traditional principal component analysis method, and the dimension direction and type of main variables are displayed through data visualization.
+In [60]:
+iris = datasets.load_iris()
+X = iris.data
+y = iris.target
+target_names = iris.target_names
+In [55]:
+colors = ['navy', 'turquoise', 'darkorange']
+pca = PCA(random_state=1)
+pca.fit(X).transform(X)
+skplt.decomposition.plot_pca_component_variance(pca, title='PCA Component Explained Variances', 
+                                                target_explained_variance=0.75, ax=None, figsize=(6,6), title_fontsize='large', text_fontsize='medium')
+skplt.decomposition.plot_pca_2d_projection(pca, X, y, title='PCA 2-D Projection', biplot=True, feature_labels=None, ax=None, 
+                                                figsize=(6,6), title_fontsize='large', text_fontsize='medium')
+plt.tight_layout()
+plt.show()
+
+
+  通过非监督机器学习算法了解数据，通过可视化的方法将结果展示出来，提取到有用的关键信息。被广泛应用在客户细分，市场细分，产品定位中。今天第一次做简单的分享，期待以后可以描述的更加详细一些。
+  The unsupervised machine learning algorithm is used to understand the data, and the results are displayed in a visual way to extract useful key information. 
+  It is widely used in customer segmentation, market segmentation and product positioning. Today is the first time to do a simple share, look forward to the future can be described in more detail.
+ 
+  Notes: In China ,the IBM Watson can't signed ,So I used my Australia friend's account .
